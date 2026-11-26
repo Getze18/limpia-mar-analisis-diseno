@@ -9,7 +9,7 @@ Videojuego 2D de laberinto con vista desde arriba. El jugador controla a **Aspi*
 | Autor | GitHub |
 |---|---|
 | Álvaro Getzemani Hernández Sánchez | [@Getze18](https://github.com/Getze18) |
-| Gonzalo David Martínez Medina | [@USUARIO_GONZALO](https://github.com/USUARIO_GONZALO) |
+| Gonzalo David Martínez Medina | [@gmartinez44-sketch](https://github.com/gmartinez44-sketch) |
 
 ## Fases del proyecto
 
