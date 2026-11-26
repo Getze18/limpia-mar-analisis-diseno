@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limpia-Mar - Prototipo</title>
+<style>
+  :root{--mar1:#0b3d5c;--mar2:#0f5a80;--arena:#f2d9a6;--coral:#ff7a6b;--alga:#2fb37a;--amarillo:#ffd23f;--blanco:#f4fbff;--sombra:0 6px 0 rgba(0,0,0,.3)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#061f2f;font-family:"Trebuchet MS",Verdana,sans-serif;color:var(--blanco);display:flex;flex-direction:column;align-items:center;min-height:100vh}
+  nav{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:10px}
+  nav a{color:var(--blanco);text-decoration:none;font-size:14px;padding:6px 10px;border-radius:6px;background:#12405e}
+  nav a:hover{background:var(--coral)}
+  .pantalla{width:1280px;height:720px;position:relative;overflow:hidden;display:none;background:linear-gradient(180deg,var(--mar2),var(--mar1))}
+  .pantalla.activa{display:block}
+  .fondo-arena{position:absolute;left:0;right:0;bottom:0;height:90px;background:var(--arena);border-top:8px solid #e3c486}
+  .burbuja{position:absolute;border:3px solid rgba(255,255,255,.5);border-radius:50%}
+  .btn{display:block;width:340px;margin:14px auto;padding:16px;border:none;border-radius:18px;font-size:28px;font-weight:bold;color:#fff;background:var(--coral);box-shadow:var(--sombra);text-align:center;text-decoration:none;font-family:inherit}
+  .btn.verde{background:var(--alga)}.btn.azul{background:#2b7bb9}.btn.gris{background:#5f7d8e}
+  .titulo{font-size:100px;text-align:center;color:var(--amarillo);text-shadow:5px 5px 0 var(--coral);line-height:1}
+  .sub{text-align:center;font-size:24px;margin-top:10px}
+  h2{font-size:50px;text-align:center;margin:26px 0 10px;color:var(--amarillo)}
+  .caja{position:absolute;background:rgba(6,31,47,.88);border:6px solid var(--amarillo);border-radius:26px;box-shadow:var(--sombra)}
+  .fila{display:flex;justify-content:space-between;font-size:30px;padding:12px 40px;border-bottom:3px dashed rgba(255,255,255,.25)}
+  /* Aspi dibujada con CSS */
+  .aspi{position:absolute;width:64px;height:50px;background:var(--amarillo);border:4px solid #8a6500;border-radius:16px 16px 12px 12px}
+  .aspi:before{content:"";position:absolute;left:10px;top:9px;width:14px;height:14px;background:#0b3d5c;border-radius:50%;box-shadow:24px 0 0 #0b3d5c}
+  .aspi:after{content:"";position:absolute;right:-22px;top:16px;width:22px;height:14px;background:#8a6500;border-radius:0 8px 8px 0}
+  .aspi.grande{transform:scale(3)}
+  /* juego */
+  .hud{position:absolute;top:0;left:0;right:0;height:64px;background:#061f2f;display:flex;align-items:center;justify-content:space-between;padding:0 30px;font-size:26px;font-weight:bold;z-index:3}
+  .lab{position:absolute;left:50%;top:84px;transform:translateX(-50%);display:grid;grid-template-columns:repeat(23,26px);grid-auto-rows:26px;gap:0}
+  .lab div{width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:18px}
+  .pared{background:#c2566a;border:2px solid #9b3f51;border-radius:6px}
+  .agua{background:#0f5a80}
+  .ficha{display:flex;gap:30px;justify-content:center;margin-top:24px}
+  .tarjeta{width:330px;background:rgba(6,31,47,.85);border:5px solid var(--amarillo);border-radius:22px;padding:20px;text-align:center;box-shadow:var(--sombra)}
+  .tarjeta .ico{font-size:64px;height:90px;display:flex;align-items:center;justify-content:center;gap:6px;position:relative}
+  .tarjeta h3{font-size:28px;margin:8px 0;color:var(--amarillo)}.tarjeta p{font-size:20px}
+  .tecla{display:inline-block;min-width:44px;padding:6px 8px;margin:2px;border-radius:8px;background:var(--blanco);color:#0b3d5c;font-weight:bold;font-size:22px}
+  .niveles{display:flex;gap:24px;justify-content:center;margin-top:40px}
+  .nivel{width:180px;height:230px;background:rgba(6,31,47,.85);border:5px solid var(--amarillo);border-radius:22px;text-align:center;padding-top:18px;box-shadow:var(--sombra);text-decoration:none;color:var(--blanco)}
+  .nivel b{font-size:70px;display:block;color:var(--amarillo)}
+  .nivel.bloq{border-color:#5f7d8e;color:#8aa3b1}.nivel.bloq b{color:#8aa3b1}
+  .estrellas{font-size:30px;color:var(--amarillo)}
+  .aviso{position:absolute;left:50%;transform:translateX(-50%);top:640px;background:var(--coral);padding:10px 24px;border-radius:14px;font-size:24px;font-weight:bold;z-index:4;box-shadow:var(--sombra)}
+  .velo{position:absolute;inset:0;background:rgba(0,0,0,.55);z-index:5}
+</style>
+</head>
+<body>
+<nav>
+  <a href="#inicio">1. Inicio</a><a href="#comojugar">2. Cómo jugar</a><a href="#niveles">3. Niveles</a><a href="#juego">4. Juego</a><a href="#pausa">5. Pausa</a><a href="#resultados">6. Resultados</a>
+</nav>
+
+<!-- 1. INICIO -->
+<section class="pantalla" id="inicio">
+  <div class="burbuja" style="left:120px;top:120px;width:40px;height:40px"></div>
+  <div class="burbuja" style="left:170px;top:70px;width:22px;height:22px"></div>
+  <div class="burbuja" style="right:160px;top:200px;width:34px;height:34px"></div>
+  <div class="fondo-arena"></div>
+  <div style="position:absolute;left:130px;bottom:120px;font-size:90px">🐠</div>
+  <div style="position:absolute;right:140px;bottom:160px;font-size:80px">🐟</div>
+  <div style="position:absolute;left:300px;bottom:70px;font-size:60px">🥫</div>
+  <div style="position:absolute;right:320px;bottom:60px;font-size:60px">🛍️</div>
+  <div style="position:absolute;top:60px;left:0;right:0">
+    <div class="titulo">Limpia-Mar</div>
+    <div class="sub">Ayuda a Aspi a limpiar el arrecife… ¡sin tragarse a los peces!</div>
+    <a class="btn" href="#niveles" style="margin-top:34px">▶ Jugar</a>
+    <a class="btn verde" href="#comojugar">❓ Cómo jugar</a>
+    <a class="btn azul" href="#resultados">🏆 Récords</a>
+    <a class="btn gris" href="#inicio">✖ Salir</a>
+  </div>
+</section>
+
+<!-- 2. COMO JUGAR -->
+<section class="pantalla" id="comojugar">
+  <div class="fondo-arena"></div>
+  <h2 style="position:relative">Cómo jugar</h2>
+  <div class="ficha" style="position:relative">
+    <div class="tarjeta"><div class="ico"><div class="aspi" style="position:relative"></div></div><h3>Mueve a Aspi</h3><p><span class="tecla">↑</span><span class="tecla">↓</span><span class="tecla">←</span><span class="tecla">→</span><br>o <span class="tecla">W</span><span class="tecla">A</span><span class="tecla">S</span><span class="tecla">D</span></p></div>
+    <div class="tarjeta"><div class="ico">🥫🥤🛞</div><h3>Aspira la basura</h3><p>Lata o botella: <b>+10</b><br>Llanta: <b>+50</b></p></div>
+    <div class="tarjeta"><div class="ico">🐟🐠</div><h3>¡No aspires peces!</h3><p>Cada pez aspirado: <b style="color:var(--coral)">−100</b><br>Esquívalos en los pasillos.</p></div>
+  </div>
+  <p style="position:relative;text-align:center;font-size:24px;margin-top:26px">Limpia toda la basura antes de que se acabe el tiempo. Pausa con <span class="tecla">Esc</span></p>
+  <a class="btn" href="#niveles" style="position:relative;width:280px">¡Entendido!</a>
+</section>
+
+<!-- 3. NIVELES -->
+<section class="pantalla" id="niveles">
+  <div class="fondo-arena"></div>
+  <h2 style="position:relative">Elige un arrecife</h2>
+  <div class="niveles" style="position:relative">
+    <a class="nivel" href="#juego"><b>1</b>Bahía tranquila<div class="estrellas">★★★</div></a>
+    <a class="nivel" href="#juego"><b>2</b>Bosque de algas<div class="estrellas">★★☆</div></a>
+    <a class="nivel" href="#juego"><b>3</b>Cueva de coral<div class="estrellas">☆☆☆</div></a>
+    <div class="nivel bloq"><b>🔒</b>Puerto viejo</div>
+    <div class="nivel bloq"><b>🔒</b>Mar profundo</div>
+  </div>
+  <a class="btn gris" href="#inicio" style="position:relative;margin-top:50px;width:240px">← Volver</a>
+</section>
+
+<!-- 4. JUEGO -->
+<section class="pantalla" id="juego">
+  <div class="hud"><span>⏱ 1:42</span><span>Nivel 3 · Cueva de coral</span><span>⭐ 340 &nbsp; 🗑 18/32</span></div>
+  <div class="lab" id="lab"></div>
+  <div class="aviso">¡Cuidado con los peces! −100</div>
+</section>
+
+<!-- 5. PAUSA -->
+<section class="pantalla" id="pausa">
+  <div class="hud"><span>⏱ 1:42</span><span>Nivel 3 · Cueva de coral</span><span>⭐ 340 &nbsp; 🗑 18/32</span></div>
+  <div class="lab" id="lab2"></div>
+  <div class="velo"></div>
+  <div class="caja" style="left:390px;top:130px;width:500px;height:470px;z-index:6">
+    <h2>Pausa</h2>
+    <a class="btn verde" href="#juego" style="width:320px">▶ Continuar</a>
+    <a class="btn azul" href="#juego" style="width:320px">↻ Reiniciar nivel</a>
+    <a class="btn gris" href="#inicio" style="width:320px">⌂ Salir al menú</a>
+  </div>
+</section>
+
+<!-- 6. RESULTADOS -->
+<section class="pantalla" id="resultados">
+  <div class="fondo-arena"></div>
+  <div class="caja" style="left:290px;top:40px;width:700px;height:620px">
+    <h2>¡Arrecife limpio!</h2>
+    <div style="text-align:center;font-size:80px;color:var(--amarillo)">★★☆</div>
+    <div class="fila"><span>🗑 Basura recogida</span><b>32 / 32</b></div>
+    <div class="fila"><span>🐟 Peces aspirados</span><b style="color:var(--coral)">2 (−200)</b></div>
+    <div class="fila"><span>⏱ Tiempo restante</span><b>0:24</b></div>
+    <div class="fila"><span>⭐ Puntaje</span><b>610 · ¡Nuevo récord!</b></div>
+    <div style="display:flex;justify-content:center;gap:20px;margin-top:22px">
+      <a class="btn azul" href="#juego" style="margin:0;width:260px">↻ Repetir</a>
+      <a class="btn" href="#niveles" style="margin:0;width:260px">Siguiente →</a>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Laberinto de ejemplo: # pared, . basura chica, L llanta, A Aspi, P pez, espacio = agua limpia
+  var mapa=[
+    "#######################",
+    "#.... ....#.....  ....#",
+    "#.##.####.#.####.###.L#",
+    "#.#   P  . . ....  #..#",
+    "#.#.###.#####.###.#.#.#",
+    "#...#...  #  ...#...#.#",
+    "###.#.###.#.###.#.###.#",
+    "#L .  .#  A  #.... .P.#",
+    "#.####.#.###.#.######.#",
+    "#..  #...#   .  ..#...#",
+    "##.#.#####.#####..#.###",
+    "#..#.  P  .  ...  #...#",
+    "#.####.#######.####.#.#",
+    "#......  .    .......L#",
+    "#######################"];
+  var iconos={'.':['🥫','🥤','🛍️'],'L':['🛞'],'P':['🐟','🐠','🐡']};
+  function pintar(id){var lab=document.getElementById(id),n=0,k=0;mapa.forEach(function(f){f.split('').forEach(function(c){var d=document.createElement('div');
+    if(c==='#'){d.className='pared'}else{d.className='agua';
+      if(c==='A'){var a=document.createElement('div');a.className='aspi';a.style.cssText='position:relative;transform:scale(.6);z-index:2';d.appendChild(a)}
+      else if(c==='.'&&(k++%3)!==0){}
+      else if(iconos[c]){d.textContent=iconos[c][n++%iconos[c].length];if(c==='P')d.style.fontSize='22px'}}
+    lab.appendChild(d)})})}
+  pintar('lab');pintar('lab2');
+  document.querySelectorAll('.lab').forEach(function(l){l.style.transform='translateX(-50%) scale(1.55)';l.style.transformOrigin='top center'});
+  function mostrar(){var id=location.hash.slice(1)||'inicio';document.querySelectorAll('.pantalla').forEach(function(s){s.classList.toggle('activa',s.id===id)})}
+  window.addEventListener('hashchange',mostrar);mostrar();
+</script>
+</body>
+</html>
